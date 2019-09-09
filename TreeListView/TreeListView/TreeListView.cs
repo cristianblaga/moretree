@@ -290,6 +290,7 @@ namespace System.Windows.Forms
 				set{base.View = View.Details;}
 			}
 			#endregion
+    
 			#region Items
 			/// <summary>
 			/// Items of the TreeListView

@@ -897,14 +897,18 @@ namespace System.Windows.Forms
 			}
 			return false;
 		}
-		#endregion
+        #endregion
+
+        Button btn = new Button() { Text = "Button" };
+
 		#region DrawFocusCues
 		internal void DrawFocusCues()
 		{
 			if(!IsInATreeListView) return;
 			if(TreeListView._updating) return;
 			if(TreeListView.HideSelection && !TreeListView.Focused) return;
-			Graphics g = Graphics.FromHwnd(TreeListView.Handle);
+
+            Graphics g = Graphics.FromHwnd(TreeListView.Handle);
 			if(Visible)
 			{
 				Rectangle entireitemrect = GetBounds(ItemBoundsPortion.Entire);
@@ -973,7 +977,8 @@ namespace System.Windows.Forms
 		{
 			if(!IsInATreeListView) return;
 			if(TreeListView._updating) return;
-			Graphics g = Graphics.FromHwnd(TreeListView.Handle);
+           
+            Graphics g = Graphics.FromHwnd(TreeListView.Handle);
 			DrawIntermediateState(g);
 			g.Dispose();
 		}
@@ -982,6 +987,7 @@ namespace System.Windows.Forms
 			if(!IsInATreeListView) return;
 			if(TreeListView._updating) return;
 			Debug.Assert(!TreeListView.InvokeRequired);
+
 			if(TreeListView.CheckBoxes != CheckBoxesTypes.Recursive || TreeListView.Columns.Count == 0) return;
 			if(CheckStatus == CheckState.Indeterminate)
 			{
@@ -994,7 +1000,35 @@ namespace System.Windows.Forms
 					g.FillRectangle(brush, r);
 				brush.Dispose();
 			}
-		}
-		#endregion
-	}
+
+            for (int i = 0; i < _items.Count; ++i)
+            {
+                var asControlWrapper = _items[i] as IControlWrappedItem;
+                if (asControlWrapper == null)
+                    continue;
+                asControlWrapper.Control.Bounds = TreeListView.GetSubItemRect(Index+i, 0);
+            }
+
+            for (int i = 0; i < SubItems.Count; ++i)
+            {
+                var asControlWrapper = SubItems[i] as IControlWrappedItem;
+                if (asControlWrapper == null)
+                    continue;
+                asControlWrapper.Control.Bounds = TreeListView.GetSubItemRect(Index, i);
+            }
+
+            var itemAsCW = this as IControlWrappedItem;
+            if (itemAsCW != null)
+            {
+                itemAsCW.Control.Bounds = TreeListView.GetItemRect(Index);
+            }
+        }
+        #endregion
+    }
+
+
+    public interface IControlWrappedItem
+    {
+        Control Control { get; set; }
+    }
 }

@@ -378,7 +378,24 @@ namespace System.Windows.Forms
 			if(index > -1) OnItemAdded(new TreeListViewEventArgs(item, TreeListViewAction.Unknown));
 			if(Count == 1 && TreeListView != null && Parent != null)
 				if(Parent.Visible) Parent.Redraw();
-			return(index);
+
+
+            if (TreeListView != null)
+            {
+                foreach (var i in item.Items)
+                {
+                    addToControlCollection(i);
+                }
+
+                foreach (var i in item.SubItems)
+                {
+                    addToControlCollection(i);
+                }
+
+                addToControlCollection(item);
+            }
+
+            return (index);
 		}
 		/// <summary>
 		/// Adds an item in the collection and in the TreeListView
@@ -491,7 +508,20 @@ namespace System.Windows.Forms
 			TreeListViewItem item = this[index];
 			if(this[index].Visible && this.TreeListView != null) item.Hide();
 			List.RemoveAt(index);
-			item.SetParent(null);
+
+            foreach (var i in item.Items)
+            {
+                removeFromControlCollection(i);
+            }
+
+            foreach (var i in item.SubItems)
+            {
+                removeFromControlCollection(i);
+            }
+
+            removeFromControlCollection(item);
+
+            item.SetParent(null);
 			// Redraw parent if no more children
 			if(Count == 0 && TreeListView != null && Parent != null)
 				Parent.Redraw();
@@ -566,5 +596,30 @@ namespace System.Windows.Forms
 			return(index);
 		}
 		#endregion
-	}
+        void removeFromControlCollection(object item)
+        {
+            if (TreeListView == null)
+                return;
+
+            var asICW = item as IControlWrappedItem;
+            if (asICW == null)
+                return;
+
+            if (TreeListView.Controls.Contains(asICW.Control))
+                TreeListView.Controls.Remove(asICW.Control);
+        }
+
+        void addToControlCollection(object item)
+        {
+            if (TreeListView == null)
+                return;
+
+            var asICW = item as IControlWrappedItem;
+            if (asICW == null)
+                return;
+
+            if (!TreeListView.Controls.Contains(asICW.Control))
+                TreeListView.Controls.Add(asICW.Control);
+        }
+    }
 }
