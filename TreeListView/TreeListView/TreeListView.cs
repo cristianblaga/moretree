@@ -68,7 +68,7 @@ namespace System.Windows.Forms
 			/// <param name="e"></param>
 			protected override void OnAfterLabelEdit(LabelEditEventArgs e)
 			{
-				throw(new Exception("Please use OnAfterLabelEdit(TreeListViewLabelEditEventArgs e)"));
+				
 			}
 			/// <summary>
 			/// Raises the BeforeLabelEdit event.
@@ -84,7 +84,7 @@ namespace System.Windows.Forms
 			/// <param name="e"></param>
 			protected override void OnBeforeLabelEdit(LabelEditEventArgs e)
 			{
-				throw(new Exception("Please use OnBeforeLabelEdit(TreeListViewLabelEditEventArgs e)"));
+				
 			}
 			/// <summary>
 			/// Raises the BeforeExpand event.
@@ -536,6 +536,7 @@ namespace System.Windows.Forms
 			int style = APIsUser32.SendMessage(Handle, (int) APIsEnums.ListViewMessages.GETEXTENDEDLISTVIEWSTYLE, 0, 0);
 			style |= (int) (APIsEnums.ListViewExtendedStyles.INFOTIP | APIsEnums.ListViewExtendedStyles.LABELTIP);
 			APIsUser32.SendMessage(Handle, (int) APIsEnums.ListViewMessages.SETEXTENDEDLISTVIEWSTYLE, 0, style);
+            
 		}
 		#endregion
 		#region WndProc
@@ -879,6 +880,9 @@ namespace System.Windows.Forms
 					base.WndProc(ref m);
 					DrawIntermediateStateItems();
 					DrawSelectedItemsFocusCues();
+                    UpdateItemsVisibility();
+                   
+
 					return;
 				#endregion
 				#region VSCROLL, HSCROLL, ENSUREVISIBLE
@@ -1116,6 +1120,23 @@ namespace System.Windows.Forms
 					item.DrawIntermediateState(g);
 				g.Dispose();
 			}
+
+        internal void UpdateItemsVisibility()
+        {
+            var visibleItems = GetVisibleItems();
+            foreach (var c in TreeListViewItemCollection.AllItems(_items))
+            {
+                var visible = visibleItems.Contains(c);
+                foreach (var subItem in c.SubItems)
+                {
+                    var asCW = subItem as IControlWrappedItem;
+                    if (asCW != null)
+                    {
+                        asCW.Control.Visible = visible;
+                    }
+                }
+            }
+        }
 			internal void DrawSelectedItemsFocusCues()
 			{
 				if(_updating) return;
@@ -1624,6 +1645,7 @@ namespace System.Windows.Forms
 				base.Items.Count : firstItemIndex + itemsPerPageCount;
 			for(int i = firstItemIndex; i < lastVisibleItemIndex; i++)
 				visibleItems.Add((TreeListViewItem) base.Items[i]);
+
 			return visibleItems;
 		}
 		/// <summary>

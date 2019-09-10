@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.ComponentModel;
 using System.Runtime.InteropServices.APIs;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace System.Windows.Forms
 {
@@ -405,7 +406,9 @@ namespace System.Windows.Forms
 		public TreeListViewItem()
 		{
 			_items = new TreeListViewItemCollection(this);
+            
 		}
+        
 		/// <summary>
 		/// Create a new instance of a TreeListViewItem
 		/// </summary>
@@ -982,50 +985,44 @@ namespace System.Windows.Forms
 			DrawIntermediateState(g);
 			g.Dispose();
 		}
-		internal void DrawIntermediateState(Graphics g)
-		{
-			if(!IsInATreeListView) return;
-			if(TreeListView._updating) return;
-			Debug.Assert(!TreeListView.InvokeRequired);
+        internal void DrawIntermediateState(Graphics g)
+        {
+            if (!IsInATreeListView) return;
+            if (TreeListView._updating) return;
+            Debug.Assert(!TreeListView.InvokeRequired);
 
-			if(TreeListView.CheckBoxes != CheckBoxesTypes.Recursive || TreeListView.Columns.Count == 0) return;
-			if(CheckStatus == CheckState.Indeterminate)
-			{
-				Rectangle rect = GetBounds(ItemBoundsPortion.Icon);
-				Rectangle r = TreeListView._comctl32Version >= 6 ?
-					new Rectangle(rect.Left - 14, rect.Top + 5, rect.Height-10, rect.Height-10) :
-					new Rectangle(rect.Left - 11, rect.Top + 5, rect.Height-10, rect.Height-10);
-				Brush brush = new Drawing.Drawing2D.LinearGradientBrush(r, Color.Gray, Color.LightBlue, 45, false);
-				if(TreeListView.Columns[0].Width > (Level + (TreeListView.ShowPlusMinus?2:1)) * SystemInformation.SmallIconSize.Width)
-					g.FillRectangle(brush, r);
-				brush.Dispose();
-			}
-
-            for (int i = 0; i < _items.Count; ++i)
+            if (TreeListView.CheckBoxes != CheckBoxesTypes.Recursive || TreeListView.Columns.Count == 0) return;
+            if (CheckStatus == CheckState.Indeterminate)
             {
-                var asControlWrapper = _items[i] as IControlWrappedItem;
-                if (asControlWrapper == null)
-                    continue;
-                asControlWrapper.Control.Bounds = TreeListView.GetSubItemRect(Index+i, 0);
+                Rectangle rect = GetBounds(ItemBoundsPortion.Icon);
+                Rectangle r = TreeListView._comctl32Version >= 6 ?
+                    new Rectangle(rect.Left - 14, rect.Top + 5, rect.Height - 10, rect.Height - 10) :
+                    new Rectangle(rect.Left - 11, rect.Top + 5, rect.Height - 10, rect.Height - 10);
+                Brush brush = new Drawing.Drawing2D.LinearGradientBrush(r, Color.Gray, Color.LightBlue, 45, false);
+                if (TreeListView.Columns[0].Width > (Level + (TreeListView.ShowPlusMinus ? 2 : 1)) * SystemInformation.SmallIconSize.Width)
+                    g.FillRectangle(brush, r);
+                brush.Dispose();
             }
 
             for (int i = 0; i < SubItems.Count; ++i)
             {
+                
                 var asControlWrapper = SubItems[i] as IControlWrappedItem;
                 if (asControlWrapper == null)
                     continue;
-                asControlWrapper.Control.Bounds = TreeListView.GetSubItemRect(Index, i);
-            }
 
-            var itemAsCW = this as IControlWrappedItem;
-            if (itemAsCW != null)
-            {
-                itemAsCW.Control.Bounds = TreeListView.GetItemRect(Index);
+                asControlWrapper.Control.Bounds = TreeListView.GetSubItemRect(Index, i);
+                asControlWrapper.Control.Visible = true;
+                Console.WriteLine($"item {Text} - {Index},{i}, { asControlWrapper.Control.Bounds} { asControlWrapper.Control}");
             }
         }
-        #endregion
-    }
 
+        #endregion
+         
+
+    }
+        
+   
 
     public interface IControlWrappedItem
     {

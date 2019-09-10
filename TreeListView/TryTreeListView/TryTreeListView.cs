@@ -18,7 +18,8 @@ namespace TryTreeListView
 		private System.Windows.Forms.ColumnHeader columnHeader2;
 		private System.Windows.Forms.ImageList imageList1;
 		private System.Windows.Forms.ColumnHeader columnHeader3;
-		private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.ColumnHeader columnHeader4;
+        private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.Button button2;
 		private System.ComponentModel.IContainer components;
 
@@ -62,7 +63,8 @@ namespace TryTreeListView
 			this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
 			this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
-			this.imageList1 = new System.Windows.Forms.ImageList(this.components);
+            this.columnHeader4 = new System.Windows.Forms.ColumnHeader();
+            this.imageList1 = new System.Windows.Forms.ImageList(this.components);
 			this.button1 = new System.Windows.Forms.Button();
 			this.button2 = new System.Windows.Forms.Button();
 			this.SuspendLayout();
@@ -196,34 +198,24 @@ namespace TryTreeListView
 
 		private void AddItems()
 		{
-			for(int k = 0; k < 4; k++)
-			{
-				TreeListViewItem itemA = new TreeListViewItem("Drive " + Enum.GetName(typeof(Drives), k), 0);
-				itemA.Expand();
-				itemA.SubItems.Add(Enum.GetName(typeof(DrivesDescr), k) + " drive");
-               
-                treeListView1.Items.Add(itemA);
-                
-				for(int i = 1; i < 11; i++)
-				{
-					TreeListViewItem item = new TreeListViewItem("Folder " + i.ToString(), 1);
-					itemA.Items.Add(item);
-					ListViewItem.ListViewSubItem subitem = item.SubItems.Add((Math.Abs(2-i)).ToString());
-//					subitem.ForeColor = Color.FromArgb(173,194,231);
-//					subitem.BackColor = Color.Yellow;
-//					subitem.Font = new Font(subitem.Font, FontStyle.Bold | FontStyle.Underline);
-					for(int j = 1; j < 5; j++)
-						item.Items.Add("Sub " + j, 3);
-				}
-			}
+			
 
-            TreeListViewItem ic = new TreeListViewItem("XXX", 0);
-            ic.SubItems.Add("");
-            ic.SubItems.Add(new Button2Item());
-          
+            var ic = new TreeListViewItem("XXX", 0);
+            var ic1 = new TreeListViewItem("XXy", 0);
+            var ic2 = new TreeListViewItem("XXz", 0);
+            ic1.SubItems.Add("");
+            ic1.SubItems.Add(new Button2Item("r ic1"));
+            
+            ic.SubItems.Add(new Button2Item("r ic"));
 
+            ic.Items.Add(ic1);
+            ic1.Items.Add(ic2);
             treeListView1.Items.Add(ic);
-           
+            
+            var h2 = new TreeListViewItem("new Hierarchy", 0);
+            h2.SubItems.Add("neinteresant");
+            h2.SubItems.Add(new Button2Item("inca unu"));
+            treeListView1.Items.Add(h2);
         }
 	
 		private enum DrivesDescr{First, Second, Third, Fourth}
@@ -236,6 +228,7 @@ namespace TryTreeListView
         public Control Control { get => _b; set => throw new NotImplementedException(); }
         public ButtonItem()
         {
+            _b.Visible = false;
             _b.Click += (sender, e) =>
             {
                 MessageBox.Show("Hello dude.");
@@ -247,8 +240,10 @@ namespace TryTreeListView
     {
         Button _b = new Button() { Text = "Push me too" };
         public Control Control { get => _b; set => throw new NotImplementedException(); }
-        public Button2Item()
+        public Button2Item(string label)
         {
+            _b.Text = label;
+            _b.Visible = false;
             _b.Click += (sender, e) =>
             {
                 MessageBox.Show("Hello dude from 2.");

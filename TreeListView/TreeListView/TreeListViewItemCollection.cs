@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 
 namespace System.Windows.Forms
@@ -379,19 +380,12 @@ namespace System.Windows.Forms
 			if(Count == 1 && TreeListView != null && Parent != null)
 				if(Parent.Visible) Parent.Redraw();
 
-
             if (TreeListView != null)
             {
-                foreach (var i in item.Items)
+                foreach (var i in AllItemControls(item))
                 {
                     addToControlCollection(i);
                 }
-
-                foreach (var i in item.SubItems)
-                {
-                    addToControlCollection(i);
-                }
-
                 addToControlCollection(item);
             }
 
@@ -620,6 +614,36 @@ namespace System.Windows.Forms
 
             if (!TreeListView.Controls.Contains(asICW.Control))
                 TreeListView.Controls.Add(asICW.Control);
+        }
+
+        public static IEnumerable<object> AllItemControls(TreeListViewItem root)
+        {
+            var asCW = root as IControlWrappedItem;
+            if (asCW != null)
+                yield return root;
+
+            foreach(var si in root.SubItems)
+            {
+                if (si is IControlWrappedItem)
+                yield return si;
+            }
+
+            foreach(TreeListViewItem i in root.Items){
+                foreach (var c in AllItemControls(i))
+                    yield return c;
+            }
+        }
+
+        public static IEnumerable<TreeListViewItem> AllItems(TreeListViewItemCollection root)
+        {
+            foreach (TreeListViewItem item in root)
+            {
+                yield return item;
+                foreach (TreeListViewItem i in AllItems(item.Items))
+                {
+                    yield return i;
+                }
+            }
         }
     }
 }
