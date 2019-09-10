@@ -242,6 +242,7 @@ namespace TryTreeListView
         public Control Control { get => _b; set => throw new NotImplementedException(); }
         public Button2Item(string label)
         {
+            _b.FlatStyle = FlatStyle.System;
             _b.Text = label;
             _b.Visible = false;
             _b.Click += (sender, e) =>

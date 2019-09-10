@@ -1011,6 +1011,7 @@ namespace System.Windows.Forms
                 if (asControlWrapper == null)
                     continue;
 
+
                 asControlWrapper.Control.Bounds = TreeListView.GetSubItemRect(Index, i);
                 asControlWrapper.Control.Visible = true;
                 Console.WriteLine($"item {Text} - {Index},{i}, { asControlWrapper.Control.Bounds} { asControlWrapper.Control}");
