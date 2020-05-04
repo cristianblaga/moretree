@@ -15,6 +15,47 @@ namespace System.Windows.Forms
 	/// </summary>
 	public class TreeListView : System.Windows.Forms.ListView
 	{
+		public HeaderControl HeaderControl
+		{
+			get { return this.headerControl ?? (this.headerControl = new HeaderControl(this)); }
+		}
+		private HeaderControl headerControl;
+
+		protected override void OnHandleCreated(EventArgs e)
+		{
+			base.OnHandleCreated(e);
+
+			this.Invoke((MethodInvoker)this.OnControlCreated);
+		}
+
+		protected override void OnHandleDestroyed(EventArgs e)
+		{
+			headerControl.DestroyHandle();
+			headerControl = null;
+			base.OnHandleDestroyed(e);
+
+
+		}
+
+		/// <summary>
+		/// This method is called after the control has been fully created.
+		/// </summary>
+		protected virtual void OnControlCreated()
+		{
+
+			// Force the header control to be created when the listview handle is
+			HeaderControl hc = this.HeaderControl;
+			
+		}
+
+		static public System.Drawing.Text.TextRenderingHint TextRenderingHint
+		{
+			get { return TreeListView.sTextRendereringHint; }
+			set { TreeListView.sTextRendereringHint = value; }
+		}
+		static private System.Drawing.Text.TextRenderingHint sTextRendereringHint =
+			System.Drawing.Text.TextRenderingHint.SystemDefault;
+
 		#region Private delegates
 		private delegate int IntHandler();
 		private delegate TreeListViewItem[] ItemArrayHandler();
@@ -68,7 +109,7 @@ namespace System.Windows.Forms
 			/// <param name="e"></param>
 			protected override void OnAfterLabelEdit(LabelEditEventArgs e)
 			{
-				
+				throw(new Exception("Please use OnAfterLabelEdit(TreeListViewLabelEditEventArgs e)"));
 			}
 			/// <summary>
 			/// Raises the BeforeLabelEdit event.
@@ -84,7 +125,7 @@ namespace System.Windows.Forms
 			/// <param name="e"></param>
 			protected override void OnBeforeLabelEdit(LabelEditEventArgs e)
 			{
-				
+				throw(new Exception("Please use OnBeforeLabelEdit(TreeListViewLabelEditEventArgs e)"));
 			}
 			/// <summary>
 			/// Raises the BeforeExpand event.
@@ -290,7 +331,6 @@ namespace System.Windows.Forms
 				set{base.View = View.Details;}
 			}
 			#endregion
-    
 			#region Items
 			/// <summary>
 			/// Items of the TreeListView
@@ -528,7 +568,7 @@ namespace System.Windows.Forms
 		public TreeListView()
 		{
 			InitializeComponent();
-			if(!IsHandleCreated) CreateHandle();
+			
 			_items = new TreeListViewItemCollection(this);
 			_items.SortOrder = _sorting;
 			_comctl32Version = APIsComctl32.GetMajorVersion();
@@ -536,34 +576,59 @@ namespace System.Windows.Forms
 			int style = APIsUser32.SendMessage(Handle, (int) APIsEnums.ListViewMessages.GETEXTENDEDLISTVIEWSTYLE, 0, 0);
 			style |= (int) (APIsEnums.ListViewExtendedStyles.INFOTIP | APIsEnums.ListViewExtendedStyles.LABELTIP);
 			APIsUser32.SendMessage(Handle, (int) APIsEnums.ListViewMessages.SETEXTENDEDLISTVIEWSTYLE, 0, style);
-            
 		}
 		#endregion
-		#region WndProc
-		/// <summary>
-		/// WndProc
-		/// </summary>
-		/// <param name="m"></param>
+		protected bool HandleNotify(ref Message m)
+		{
+			bool isMsgHandled = false;
+
+			const int NM_CUSTOMDRAW = -12;
+			const int HDN_FIRST = (0 - 300);
+			const int HDN_ITEMCHANGINGA = (HDN_FIRST - 0);
+			const int HDN_ITEMCHANGINGW = (HDN_FIRST - 20);
+			const int HDN_ITEMCLICKA = (HDN_FIRST - 2);
+			const int HDN_ITEMCLICKW = (HDN_FIRST - 22);
+			const int HDN_DIVIDERDBLCLICKA = (HDN_FIRST - 5);
+			const int HDN_DIVIDERDBLCLICKW = (HDN_FIRST - 25);
+			const int HDN_BEGINTRACKA = (HDN_FIRST - 6);
+			const int HDN_BEGINTRACKW = (HDN_FIRST - 26);
+			const int HDN_ENDTRACKA = (HDN_FIRST - 7);
+			const int HDN_ENDTRACKW = (HDN_FIRST - 27);
+			const int HDN_TRACKA = (HDN_FIRST - 8);
+			const int HDN_TRACKW = (HDN_FIRST - 28);
+
+			APIsStructs.NMHEADER_ nmheader = (APIsStructs.NMHEADER_)m.GetLParam(typeof(APIsStructs.NMHEADER_));
+			switch (nmheader.nhdr.code)
+			{
+
+				case NM_CUSTOMDRAW:
+					isMsgHandled = this.HeaderControl.HandleHeaderCustomDraw(ref m);
+					break;
+			}
+
+			return isMsgHandled;
+		}
+		
 		protected override void WndProc(ref System.Windows.Forms.Message m)
 		{
 			#region View messages
-			if(false)
+			if (false)
 			{
 				string val;
-				val = Enum.GetName(typeof(APIsEnums.ListViewMessages), (APIsEnums.ListViewMessages) m.Msg);
-				if(val != "" && val != null)
+				val = Enum.GetName(typeof(APIsEnums.ListViewMessages), (APIsEnums.ListViewMessages)m.Msg);
+				if (val != "" && val != null)
 					Debug.WriteLine(val);
 				else
 				{
-					val = Enum.GetName(typeof(APIsEnums.WindowMessages), (APIsEnums.WindowMessages) m.Msg);
-					if(val != "" && val != null)
-					Debug.WriteLine(val);
+					val = Enum.GetName(typeof(APIsEnums.WindowMessages), (APIsEnums.WindowMessages)m.Msg);
+					if (val != "" && val != null)
+						Debug.WriteLine(val);
 				}
-				if(val != "" && val != null)
+				if (val != "" && val != null)
 					Debug.WriteLine(m.Msg.ToString());
-				if(val == "LBUTTONDOWN")
+				if (val == "LBUTTONDOWN")
 				{
-					int a= 0;
+					int a = 0;
 					a++;
 				}
 			}
@@ -571,281 +636,99 @@ namespace System.Windows.Forms
 
 
 			TreeListViewItem item = null; Rectangle rec;
-			switch((APIsEnums.WindowMessages) m.Msg)
+			switch ((APIsEnums.WindowMessages)m.Msg)
 			{
 				#region NOTIFY
 				case APIsEnums.WindowMessages.NOTIFY:
-				case (APIsEnums.WindowMessages) APIsEnums.ReflectedMessages.NOTIFY:
-					APIsStructs.NMHDR nmhdr = (APIsStructs.NMHDR) m.GetLParam(typeof(APIsStructs.NMHDR));
-					APIsStructs.NMHEADER nmheader =(APIsStructs.NMHEADER) m.GetLParam(typeof(APIsStructs.NMHEADER));
-					switch((APIsEnums.ListViewNotifications) nmhdr.code)
-					{
-						#region APIsEnums.ListViewNotifications.MARQUEEBEGIN
-						case APIsEnums.ListViewNotifications.MARQUEEBEGIN:
-							if((MouseButtons & MouseButtons.Left) != MouseButtons.Left)
-								m.Result = (IntPtr)1;
-							else
-								_hasMarquee = true;
-							break;
-						#endregion
-						#region APIsEnums.ListViewNotifications.ITEMCHANGING
-						case APIsEnums.ListViewNotifications.ITEMCHANGING:
-							APIsStructs.NMLISTVIEW nmlistview = (APIsStructs.NMLISTVIEW) m.GetLParam(typeof(APIsStructs.NMLISTVIEW));
-							if(nmlistview.iItem < 0) break;
-							if((item = GetTreeListViewItemFromIndex(nmlistview.iItem)) == null) break;
-							bool cancel = false;
-							if(nmlistview.Select)
-							{
-								if(_selectionMark == null) _selectionMark = item;
-								else if(!_selectionMark.Visible) _selectionMark = item;
-								if(HasMarquee) item.Focused = true;
-							}
-							else if(nmlistview.UnSelect && HasMarquee)
-							{
-								if(item.NextVisibleItem != null)
-									if(item.NextVisibleItem.Selected)
-										item.NextVisibleItem.Focused = true;
-								if(item.PrevVisibleItem != null)
-									if(item.PrevVisibleItem.Selected)
-										item.PrevVisibleItem.Focused = true;
-							}
-							#region Select after dbl click
-							// Disable the selection after a double click (normaly, if the control scrolls after
-							// a collapse, the new item under the cursor is automatically selected...)
-							if(_dblclicktime.AddMilliseconds(500).CompareTo(DateTime.Now) > 0 &&
-								(nmlistview.Select || nmlistview.Focus) &&
-								FocusedItem != item)
-								cancel = true;
-							#endregion
-							#region Wrong Level Select
-							if(((APIsEnums.ListViewItemStates)nmlistview.uNewState & APIsEnums.ListViewItemStates.SELECTED) == APIsEnums.ListViewItemStates.SELECTED &&
-								MultiSelect)
-								if(SelectedIndices.Count > 0)
-									if(GetTreeListViewItemFromIndex(nmlistview.iItem).Parent != SelectedItems[0].Parent)
-										cancel = true;
-							#endregion
-							#region Check during selection
-							// Disable check boxes check when :
-							// - the Marquee selection tool is being used
-							// - the Ctrl or Shift keys are down
-							bool state = (nmlistview.uChanged & (uint)APIsEnums.ListViewItemFlags.STATE) == (uint)APIsEnums.ListViewItemFlags.STATE;
-							bool ctrlKeyDown = (ModifierKeys & Keys.Control) == Keys.Control;
-							bool shiftKeyDown = (ModifierKeys & Keys.Shift) == Keys.Shift;
-							if((nmlistview.Check || nmlistview.UnCheck) &&
-								(HasMarquee || ctrlKeyDown || shiftKeyDown))
-							{
-//									MessageBox.Show(this,
-//										"uChanged = " + nmlistview->uChanged.ToString() + "\n\n" + 
-//										"uOld = " + nmlistview->uOldState.ToString() + "\n" + 
-//										"uNew = " + nmlistview->uChanged.ToString() + "\n\n" +
-//										"OldCheck : " + (oldCheck ? "true" : "false") + "\n" + 
-//										"NewCheck : " + (newCheck ? "true" : "false"));
-								cancel = true;
-							}
-							#endregion
-							if(cancel)
-							{
-								m.Result = (IntPtr)1;
-								return;
-							}
-							break;
-						#endregion
-
-						#region APIsEnums.ListViewNotifications.BEGINLABELEDIT
-						case APIsEnums.ListViewNotifications.BEGINLABELEDIT:
-							// Cancel label edit if the message is sent just after a double click
-							if(_lastdoubleclick.AddMilliseconds(450) > DateTime.Now)
-							{
-								Message canceledit = Message.Create(Handle, (int) APIsEnums.ListViewMessages.CANCELEDITLABEL, IntPtr.Zero, IntPtr.Zero);
-								WndProc(ref canceledit);
-								m.Result = (IntPtr) 1;
-								return;
-							}
-							item = _lastitemclicked.Item;
-							item.EnsureVisible();
-							// Add subitems if needed
-							while(item.SubItems.Count-1 < _lastitemclicked.ColumnIndex) item.SubItems.Add("");
-							TreeListViewBeforeLabelEditEventArgs beforeed = new TreeListViewBeforeLabelEditEventArgs(
-								FocusedItem, _lastitemclicked.ColumnIndex, item.SubItems[_lastitemclicked.ColumnIndex].Text);
-							OnBeforeLabelEdit(beforeed);
-							if(beforeed.Cancel)
-							{
-								Message canceledit = Message.Create(Handle, (int) APIsEnums.ListViewMessages.CANCELEDITLABEL, IntPtr.Zero, IntPtr.Zero);
-								WndProc(ref canceledit);
-								m.Result = (IntPtr) 1;
-								return;
-							}
-							_inedit = true;
-							// Get edit handle
-							Message mess = Message.Create(Handle, (int)APIsEnums.ListViewMessages.GETEDITCONTROL, IntPtr.Zero, IntPtr.Zero);
-							WndProc(ref mess);
-							IntPtr edithandle = mess.Result;
-							_customedit = new CustomEdit(edithandle, this, beforeed.Editor);
-							_editeditem = new EditItemInformations(
-								FocusedItem, beforeed.ColumnIndex, FocusedItem.SubItems[beforeed.ColumnIndex].Text);
-							m.Result = IntPtr.Zero;
-							return;
-						#endregion
-						#region APIsEnums.ListViewNotifications.ENDLABELEDIT
-						case APIsEnums.ListViewNotifications.ENDLABELEDIT:
-							if(_customedit != null)
-								_customedit.HideEditControl();
-							_customedit = null;
-							_inedit = false;
-							_editeditem = new EditItemInformations();
-							m.Result = IntPtr.Zero;
-							return;
-						#endregion
-						
-						#region CUSTOMDRAW
-						case (APIsEnums.ListViewNotifications) APIsEnums.NotificationMessages.CUSTOMDRAW:
-							base.WndProc(ref m);
-							CustomDraw(ref m);
-							return;
-						#endregion
-
-						#region BEGINSCROLL
-						case APIsEnums.ListViewNotifications.BEGINSCROLL:
-							_updating = true;
-							break;
-						#endregion
-						#region ENDSCROLL
-						case APIsEnums.ListViewNotifications.ENDSCROLL:
-							_updating = false;
-							// Disable display bug with vertical lines (slow...)
-//							if(ShowPlusMinus)
-//							{
-//								DrawPlusMinusItemsLines();
-//								DrawPlusMinusItems();
-//							}
-							break;
-						#endregion
-
-						#region APIsEnums.HeaderControlNotifications.BEGINDRAG
-						case (APIsEnums.ListViewNotifications) APIsEnums.HeaderControlNotifications.BEGINDRAG:
-							nmheader =(APIsStructs.NMHEADER) m.GetLParam(typeof(APIsStructs.NMHEADER));
-							if(nmheader.iItem == 0)
-							{
-								m.Result = (IntPtr)1;
-								return;
-							}
-							break;
-						#endregion
-						#region APIsEnums.HeaderControlNotifications.ENDDRAG
-						case (APIsEnums.ListViewNotifications) APIsEnums.HeaderControlNotifications.ENDDRAG:
-							nmheader =(APIsStructs.NMHEADER) m.GetLParam(typeof(APIsStructs.NMHEADER));
-							// Get mouse position in header coordinates
-							IntPtr headerHandle = (IntPtr) APIsUser32.SendMessage(Handle, (int) APIsEnums.ListViewMessages.GETHEADER, IntPtr.Zero, IntPtr.Zero);
-							APIsStructs.POINTAPI pointapi = new APIsStructs.POINTAPI(MousePosition);
-							APIsUser32.ScreenToClient(headerHandle, ref pointapi);
-							// HeaderItem Rect
-							APIsStructs.RECT headerItemRect = new APIsStructs.RECT();
-							APIsUser32.SendMessage(headerHandle, (int)APIsEnums.HeaderControlMessages.GETITEMRECT, 0, ref headerItemRect);
-							int headerItemWidth = headerItemRect.right - headerItemRect.left;
-							// Cancel the drag operation if the first column is moved
-							// or destination is the first column
-							if(pointapi.x <= headerItemRect.left + headerItemWidth / 2 ||
-								nmheader.iItem == 0)
-							{
-								m.Result = (IntPtr)1;
-								return;
-							}
-							break;
-						#endregion
-						#region APIsEnums.HeaderControlNotifications.TRACK / ENDTRACK
-//						case (APIsEnums.ListViewNotifications)APIsEnums.HeaderControlNotifications.TRACK:
-						case (APIsEnums.ListViewNotifications)APIsEnums.HeaderControlNotifications.ENDTRACK:
-							Invalidate();
-							break;
-						#endregion
-					}
+					if (!this.HandleNotify(ref m))
+						base.WndProc(ref m);
 					break;
 				#endregion
 
 				#region LBUTTONDOWN
-					// Cancel the click on checkboxes if the item is not "checkable"
-					case APIsEnums.WindowMessages.LBUTTONDOWN:
-						if(Columns.Count == 0) break;
-						// Set the clickeditem and column
-						int colclicked = GetColumnAt(MousePosition);
-						if(colclicked == -1) colclicked = 0;
-						item = GetItemAtFullRow(PointToClient(MousePosition));
-						_lastitemclicked = new EditItemInformations(item, colclicked, "");
-						if(_selectionMark == null || !_selectionMark.Visible) _selectionMark = item;
-						if(((APIsEnums.KeyStatesMasks)(int)m.WParam & APIsEnums.KeyStatesMasks.SHIFT) != APIsEnums.KeyStatesMasks.SHIFT &&
-							!(((APIsEnums.KeyStatesMasks)(int)m.WParam & APIsEnums.KeyStatesMasks.CONTROL) == APIsEnums.KeyStatesMasks.CONTROL &&
-							item.Parent != _selectionMark.Parent))
-							_selectionMark = item;
-						// Get where the mouse has clicked
-						APIsStructs.LVHITTESTINFO lvhittest = new APIsStructs.LVHITTESTINFO();
-						lvhittest.pt = new APIsStructs.POINTAPI(PointToClient(MousePosition));
-						APIsUser32.SendMessage(Handle, (Int32) APIsEnums.ListViewMessages.HITTEST, 0, ref lvhittest);
-						if(item == null) break;
-						// Plus / Minus click
-						if(item.GetBounds(TreeListViewItemBoundsPortion.PlusMinus).Contains(PointToClient(MousePosition)) &&
-							ShowPlusMinus && item.Items.Count > 0 &&
-							Columns[0].Width > (item.Level+1)*SystemInformation.SmallIconSize.Width)
+				// Cancel the click on checkboxes if the item is not "checkable"
+				case APIsEnums.WindowMessages.LBUTTONDOWN:
+					if (Columns.Count == 0) break;
+					// Set the clickeditem and column
+					int colclicked = GetColumnAt(MousePosition);
+					if (colclicked == -1) colclicked = 0;
+					item = GetItemAtFullRow(PointToClient(MousePosition));
+					_lastitemclicked = new EditItemInformations(item, colclicked, "");
+					if (_selectionMark == null || !_selectionMark.Visible) _selectionMark = item;
+					if (((APIsEnums.KeyStatesMasks)(int)m.WParam & APIsEnums.KeyStatesMasks.SHIFT) != APIsEnums.KeyStatesMasks.SHIFT &&
+						!(((APIsEnums.KeyStatesMasks)(int)m.WParam & APIsEnums.KeyStatesMasks.CONTROL) == APIsEnums.KeyStatesMasks.CONTROL &&
+						item.Parent != _selectionMark.Parent))
+						_selectionMark = item;
+					// Get where the mouse has clicked
+					APIsStructs.LVHITTESTINFO lvhittest = new APIsStructs.LVHITTESTINFO();
+					lvhittest.pt = new APIsStructs.POINTAPI(PointToClient(MousePosition));
+					APIsUser32.SendMessage(Handle, (Int32)APIsEnums.ListViewMessages.HITTEST, 0, ref lvhittest);
+					if (item == null) break;
+					// Plus / Minus click
+					if (item.GetBounds(TreeListViewItemBoundsPortion.PlusMinus).Contains(PointToClient(MousePosition)) &&
+						ShowPlusMinus && item.Items.Count > 0 &&
+						Columns[0].Width > (item.Level + 1) * SystemInformation.SmallIconSize.Width)
+					{
+						Focus();
+						if (item.IsExpanded) item.Collapse();
+						else item.Expand();
+						OnMouseDown(new MouseEventArgs(MouseButtons.Left, 1, PointToClient(MousePosition).X, PointToClient(MousePosition).Y, 0));
+						return;
+					}
+					// Cancel mouse click if multiselection on a wrong item
+					if (SelectedIndices.Count > 0 &&
+						(((APIsEnums.KeyStatesMasks)(int)m.WParam & APIsEnums.KeyStatesMasks.SHIFT) == APIsEnums.KeyStatesMasks.SHIFT ||
+						((APIsEnums.KeyStatesMasks)(int)m.WParam & APIsEnums.KeyStatesMasks.CONTROL) == APIsEnums.KeyStatesMasks.CONTROL) &&
+						MultiSelect)
+					{
+						if (_selectionMark.Parent == item.Parent &&
+							((APIsEnums.KeyStatesMasks)(int)m.WParam & APIsEnums.KeyStatesMasks.SHIFT) == APIsEnums.KeyStatesMasks.SHIFT)
 						{
-							Focus();
-							if(item.IsExpanded) item.Collapse();
-							else item.Expand();
-							OnMouseDown(new MouseEventArgs(MouseButtons.Left, 1, PointToClient(MousePosition).X, PointToClient(MousePosition).Y, 0));
+							_updating = true;
+							SetSelectedItemsRange(item, _selectionMark);
+							// Prevent all item at the wrong level of being selected
+							m.WParam = (IntPtr)APIsEnums.KeyStatesMasks.CONTROL;
+							base.WndProc(ref m);
+							item.Selected = true;
+							_updating = false;
+							DrawSelectedItemsFocusCues();
 							return;
 						}
-						// Cancel mouse click if multiselection on a wrong item
-						if(SelectedIndices.Count > 0 &&
-							(((APIsEnums.KeyStatesMasks)(int)m.WParam & APIsEnums.KeyStatesMasks.SHIFT) == APIsEnums.KeyStatesMasks.SHIFT ||
-							((APIsEnums.KeyStatesMasks)(int)m.WParam & APIsEnums.KeyStatesMasks.CONTROL) == APIsEnums.KeyStatesMasks.CONTROL) &&
-							MultiSelect)
-						{
-							if(_selectionMark.Parent == item.Parent &&
-								((APIsEnums.KeyStatesMasks)(int)m.WParam & APIsEnums.KeyStatesMasks.SHIFT) == APIsEnums.KeyStatesMasks.SHIFT)
-							{
-								_updating = true;
-								SetSelectedItemsRange(item, _selectionMark);
-								// Prevent all item at the wrong level of being selected
-								m.WParam = (IntPtr) APIsEnums.KeyStatesMasks.CONTROL;
-								base.WndProc(ref m);
-								item.Selected = true;
-								_updating = false;
-								DrawSelectedItemsFocusCues();
-								return;
-							}
-						}
-						break;
+					}
+					break;
 				#endregion
 				#region LBUTTONDBLCLK
-					// Disable this notification to remove the auto-check when
-					// the user double-click on an item and append the expand / collapse function
+				// Disable this notification to remove the auto-check when
+				// the user double-click on an item and append the expand / collapse function
 				case APIsEnums.WindowMessages.LBUTTONDBLCLK:
 					_lastdoubleclick = DateTime.Now;
-					if(FocusedItem != null)
+					if (FocusedItem != null)
 					{
 						item = FocusedItem;
 						bool doExpColl = false;
-						switch(ExpandMethod)
+						switch (ExpandMethod)
 						{
 							case TreeListViewExpandMethod.IconDbleClick:
 								rec = item.GetBounds(ItemBoundsPortion.Icon);
-								if(rec.Contains(PointToClient(MousePosition))) doExpColl = true;
+								if (rec.Contains(PointToClient(MousePosition))) doExpColl = true;
 								break;
 							case TreeListViewExpandMethod.ItemOnlyDbleClick:
 								rec = item.GetBounds(ItemBoundsPortion.ItemOnly);
-								if(rec.Contains(PointToClient(MousePosition))) doExpColl = true;
+								if (rec.Contains(PointToClient(MousePosition))) doExpColl = true;
 								break;
 							case TreeListViewExpandMethod.EntireItemDbleClick:
 								rec = item.GetBounds(ItemBoundsPortion.Entire);
-								if(rec.Contains(PointToClient(MousePosition))) doExpColl = true;
+								if (rec.Contains(PointToClient(MousePosition))) doExpColl = true;
 								break;
 							default:
 								break;
 						}
-						if(doExpColl)
+						if (doExpColl)
 						{
 							_dblclicktime = DateTime.Now;
 							Cursor = Cursors.WaitCursor;
 							BeginUpdate();
-							if(item.IsExpanded) item.Collapse();
+							if (item.IsExpanded) item.Collapse();
 							else item.Expand();
 							EndUpdate();
 							Cursor = Cursors.Default;
@@ -856,22 +739,22 @@ namespace System.Windows.Forms
 				#endregion
 				#region MOUSEMOVE
 				case APIsEnums.WindowMessages.MOUSEMOVE:
-					if((MouseButtons & MouseButtons.Left) != MouseButtons.Left && HasMarquee)
+					if ((MouseButtons & MouseButtons.Left) != MouseButtons.Left && HasMarquee)
 						_hasMarquee = false;
 					break;
 				#endregion
 				#region UNICHAR, CHAR, KEYDOWN
 				case APIsEnums.WindowMessages.UNICHAR:
 				case APIsEnums.WindowMessages.CHAR:
-					CharPressed((char) m.WParam);
+					CharPressed((char)m.WParam);
 					return;
 				case APIsEnums.WindowMessages.KEYDOWN:
-					OnKeyDown(new KeyEventArgs((Keys)(int) m.WParam));
+					OnKeyDown(new KeyEventArgs((Keys)(int)m.WParam));
 					return;
 				#endregion
 				#region PAINT
 				case APIsEnums.WindowMessages.PAINT:
-					if(InEdit && EditedItem.Item != null)
+					if (InEdit && EditedItem.Item != null)
 					{
 						APIsStructs.RECT rect = new APIsStructs.RECT(
 							EditedItem.Item.GetBounds(ItemBoundsPortion.Entire));
@@ -880,24 +763,26 @@ namespace System.Windows.Forms
 					base.WndProc(ref m);
 					DrawIntermediateStateItems();
 					DrawSelectedItemsFocusCues();
-                    UpdateItemsVisibility();
-                   
-
 					return;
 				#endregion
 				#region VSCROLL, HSCROLL, ENSUREVISIBLE
 				case APIsEnums.WindowMessages.VSCROLL:
 				case APIsEnums.WindowMessages.HSCROLL:
 				case (APIsEnums.WindowMessages)APIsEnums.ListViewMessages.ENSUREVISIBLE:
-					if(!Scrollable)
+					if (!Scrollable)
 					{
 						m.Result = (IntPtr)0;
 						return;
 					}
 					break;
 				#endregion
+
+				default:
+					base.WndProc(ref m);
+					break;
 			}
-			base.WndProc(ref m);
+			
+
 		}
 		#region KeyFunction
 			#region OnKeyDown
@@ -1064,7 +949,8 @@ namespace System.Windows.Forms
 			}
 			#endregion
 		#endregion
-		#endregion
+		
+
 		#region Draw
 			#region CustomDraw
 			private void CustomDraw(ref Message m)
@@ -1120,23 +1006,6 @@ namespace System.Windows.Forms
 					item.DrawIntermediateState(g);
 				g.Dispose();
 			}
-
-        internal void UpdateItemsVisibility()
-        {
-            var visibleItems = GetVisibleItems();
-            foreach (var c in TreeListViewItemCollection.AllItems(_items))
-            {
-                var visible = visibleItems.Contains(c);
-                foreach (var subItem in c.SubItems)
-                {
-                    var asCW = subItem as IControlWrappedItem;
-                    if (asCW != null)
-                    {
-                        asCW.Control.Visible = visible;
-                    }
-                }
-            }
-        }
 			internal void DrawSelectedItemsFocusCues()
 			{
 				if(_updating) return;
@@ -1530,104 +1399,7 @@ namespace System.Windows.Forms
 		}
 		#endregion
 
-		#region Column Order
-		/// <summary>
-		/// Get the index of the specified column from its physical position
-		/// </summary>
-		/// <param name="columnorder"></param>
-		/// <returns></returns>
-		public int GetColumnIndex(int columnorder)
-		{
-			if(columnorder < 0 || columnorder > Columns.Count - 1) return(-1);
-			return APIsUser32.SendMessage(Handle, (int)APIsEnums.HeaderControlMessages.ORDERTOINDEX, columnorder, 0);
-		}
-		/// <summary>
-		/// Gets the order of a specified column
-		/// </summary>
-		/// <param name="columnindex"></param>
-		/// <returns></returns>
-		public int GetColumnOrder(int columnindex)
-		{
-			if(this.Columns.Count == 0) return(-1);
-			if(columnindex < 0 || columnindex > this.Columns.Count - 1) return(-1);
-			IntPtr[] colorderarray = new IntPtr[this.Columns.Count];
-			APIsUser32.SendMessage(this.Handle, (int) APIsEnums.ListViewMessages.GETCOLUMNORDERARRAY, (IntPtr) this.Columns.Count, ref colorderarray[0]);
-			return((int) colorderarray[columnindex]);
-		}
-		/// <summary>
-		/// Gets the columns order
-		/// </summary>
-		/// <returns>Example {3,1,4,2}</returns>
-		public int[] GetColumnsOrder()
-		{
-			if(this.Columns.Count == 0) return(new int[] {});
-			IntPtr[] colorderarray = new IntPtr[this.Columns.Count];
-			try
-			{
-				APIsUser32.SendMessage(this.Handle, (int) APIsEnums.ListViewMessages.GETCOLUMNORDERARRAY, (IntPtr) this.Columns.Count, ref colorderarray[0]);
-			}
-			catch{}
-			int[] colorderarrayint = new int[this.Columns.Count];
-			for(int i = 0 ; i < this.Columns.Count ; i ++)
-				colorderarrayint[i] = (int) colorderarray[i];
-			return(colorderarrayint);
-		}
-		/// <summary>
-		/// Indicates the column order (for example : {0,1,3,2})
-		/// </summary>
-		/// <param name="colorderarray"></param>
-		public void SetColumnsOrder(int[] colorderarray)
-		{
-			if(this.Columns.Count == 0) return;
-			if(colorderarray.Length != this.Columns.Count) return;
-			if(colorderarray[0] != 0) return;
-			IntPtr[] colorderarrayintptr = new IntPtr[this.Columns.Count];
-			for(int i = 0 ; i < this.Columns.Count ; i ++)
-				colorderarrayintptr[i] = (IntPtr) colorderarray[i];
-			try
-			{
-				APIsUser32.SendMessage(this.Handle, (int) APIsEnums.ListViewMessages.SETCOLUMNORDERARRAY, (IntPtr) this.Columns.Count, ref colorderarrayintptr[0]);
-			}
-			catch{}
-			Refresh();
-		}
-
-		private void _scroll()
-		{
-			while(MouseButtons == MouseButtons.Middle)
-			{
-				int dx = MousePosition.Y - _mousescrollposition.Y;
-				int dy = MousePosition.Y - _mousescrollposition.Y;
-				Scroll(
-					dx,
-					dy);
-				Threading.Thread.Sleep(100);
-			}
-			Cursor = Cursors.Default;
-		}
-		
-		/// <summary>
-		/// Scrolls the control
-		/// </summary>
-		/// <param name="x"></param>
-		/// <param name="y"></param>
-		public void Scroll(int x, int y)
-		{
-			APIsUser32.SendMessage(Handle, (int) APIsEnums.ListViewMessages.SCROLL, x, y);
-		}
-		/// <summary>
-		/// Indicates the column order (for example : "3142")
-		/// </summary>
-		/// <param name="colorder"></param>
-		public void SetColumnsOrder(string colorder)
-		{
-			if(colorder == null) return;
-			int[] colorderarray = new int[colorder.Length];
-			for(int i = 0 ; i < colorder.Length ; i++)
-				colorderarray[i] = int.Parse(new String(colorder[i], 1));
-			SetColumnsOrder(colorderarray);
-		}
-		#endregion
+	
 
 		#region Item Region
 		/// <summary>
@@ -1645,7 +1417,6 @@ namespace System.Windows.Forms
 				base.Items.Count : firstItemIndex + itemsPerPageCount;
 			for(int i = firstItemIndex; i < lastVisibleItemIndex; i++)
 				visibleItems.Add((TreeListViewItem) base.Items[i]);
-
 			return visibleItems;
 		}
 		/// <summary>

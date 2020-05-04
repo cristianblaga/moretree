@@ -23,7 +23,7 @@
     <UpgradeBackupLocation>
     </UpgradeBackupLocation>
     <OldToolsVersion>0.0</OldToolsVersion>
-    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -96,11 +96,15 @@
     <Compile Include="Forms\TreeListViewItemsEditor.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="HeaderControl.cs" />
     <Compile Include="ITreeListViewItemComparer.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="SelectedTreeListViewItemCollection.cs">
       <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TreeListColumnHeader.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="TreeListView.cs">
       <SubType>Component</SubType>

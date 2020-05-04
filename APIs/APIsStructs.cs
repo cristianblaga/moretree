@@ -480,6 +480,16 @@ namespace System.Runtime.InteropServices.APIs
 			public int idFrom;
 			public int code;
 		}
+
+		// The above is nont exactly as it should so I defined another struct.
+		[StructLayout(LayoutKind.Sequential)]
+		public struct NMHDR_
+		{
+			public IntPtr hwndFrom;
+			public IntPtr idFrom;
+			public int code;
+		}
+
 		#endregion
 		#region NMCUSTOMDRAW
 		[StructLayout(LayoutKind.Sequential)]
@@ -493,6 +503,28 @@ namespace System.Runtime.InteropServices.APIs
 			public uint uItemState;
 			public IntPtr lItemlParam;
 		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct NMCUSTOMDRAW_
+		{
+			public NMHDR_ nmcd;
+			public int dwDrawStage;
+			public IntPtr hdc;
+			public RECT rc;
+			public IntPtr dwItemSpec;
+			public int uItemState;
+			public IntPtr lItemlParam;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct NMHEADER_
+		{
+			public NMHDR_ nhdr;
+			public int iItem;
+			public int iButton;
+			public IntPtr pHDITEM;
+		}
+
 		#endregion
 		#region NMLVCUSTOMDRAW
 		[StructLayout(LayoutKind.Sequential)]
@@ -690,5 +722,27 @@ namespace System.Runtime.InteropServices.APIs
 			public uint time;
 			public uint dwExtra;
 		}
+
+
+		public const int SWP_FRAMECHANGED = 32;
+		[StructLayout(LayoutKind.Sequential)]
+		public class HDLAYOUT
+		{
+			public IntPtr prc;
+			public IntPtr pwpos;
+		}
+
+		[StructLayout(LayoutKind.Sequential)]
+		public struct WINDOWPOS
+		{
+			public IntPtr hwnd;
+			public IntPtr hwndInsertAfter;
+			public int x;
+			public int y;
+			public int cx;
+			public int cy;
+			public int flags;
+		}
+
 	}
 }

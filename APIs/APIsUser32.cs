@@ -1,4 +1,5 @@
 using System;
+using System.Windows.Forms;
 
 namespace System.Runtime.InteropServices.APIs
 {
@@ -177,5 +178,21 @@ namespace System.Runtime.InteropServices.APIs
 		[DllImport("user32.dll")]
 		public static extern bool SendMessage(IntPtr hWnd, int msg,
 			IntPtr wParam, ref IntPtr lParam);
+
+		[DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+		public static extern bool InvalidateRect(IntPtr hWnd, int ignored, bool erase);
+
+		[DllImport("user32.dll", EntryPoint = "SendMessage", CharSet = CharSet.Auto)]
+		public static extern IntPtr SendMessageRECT(IntPtr hWnd, int msg, int wParam, ref APIsStructs.RECT r);
+
+		[DllImport("user32.dll", EntryPoint = "SendMessage", CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern IntPtr SendMessageIntPtr(IntPtr hWnd, int msg, int wParam, int lParam);
+
+		private const int LVM_FIRST = 0x1000;
+		private const int LVM_GETHEADER = LVM_FIRST + 31;
+		public static IntPtr GetHeaderControl(ListView list)
+		{
+			return SendMessageIntPtr(list.Handle, LVM_GETHEADER, 0, 0);
+		}
 	}
 }
