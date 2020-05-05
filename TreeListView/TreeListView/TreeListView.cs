@@ -15,9 +15,16 @@ namespace System.Windows.Forms
 	/// </summary>
 	public class TreeListView : System.Windows.Forms.ListView
 	{
+		public bool UseCustomDrawHeader
+		{
+			get;set;
+		}
 		public HeaderControl HeaderControl
 		{
-			get { return this.headerControl ?? (this.headerControl = new HeaderControl(this)); }
+			get {
+
+				return UseCustomDrawHeader ?  this.headerControl ?? (this.headerControl = new HeaderControl(this)) : null;
+			}
 		}
 		private HeaderControl headerControl;
 
@@ -30,8 +37,11 @@ namespace System.Windows.Forms
 
 		protected override void OnHandleDestroyed(EventArgs e)
 		{
-			headerControl.DestroyHandle();
-			headerControl = null;
+			if (headerControl != null)
+			{
+				headerControl.DestroyHandle();
+				headerControl = null;
+			}
 			base.OnHandleDestroyed(e);
 
 
@@ -941,14 +951,16 @@ namespace System.Windows.Forms
 			
 			base.WndProc(ref m);
 
-
-			if ((APIsEnums.WindowMessages)m.Msg == APIsEnums.WindowMessages.NOTIFY)
+			if (headerControl != null)
 			{
-				const int NM_CUSTOMDRAW = -12;
-				APIsStructs.NMHEADER_ headerMessage = (APIsStructs.NMHEADER_)m.GetLParam(typeof(APIsStructs.NMHEADER_));
-				if (headerMessage.nhdr.code == NM_CUSTOMDRAW)
+				if ((APIsEnums.WindowMessages)m.Msg == APIsEnums.WindowMessages.NOTIFY)
 				{
-					HeaderControl.HandleHeaderCustomDraw(ref m);
+					const int NM_CUSTOMDRAW = -12;
+					APIsStructs.NMHEADER_ headerMessage = (APIsStructs.NMHEADER_)m.GetLParam(typeof(APIsStructs.NMHEADER_));
+					if (headerMessage.nhdr.code == NM_CUSTOMDRAW)
+					{
+						HeaderControl.HandleHeaderCustomDraw(ref m);
+					}
 				}
 			}
 		}

@@ -72,6 +72,7 @@ namespace TryTreeListView
 			// treeListView1
 			// 
 			this.treeListView1.AllowColumnReorder = true;
+			treeListView1.UseCustomDrawHeader = false;
 			this.treeListView1.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
 				| System.Windows.Forms.AnchorStyles.Left) 
 				| System.Windows.Forms.AnchorStyles.Right);
