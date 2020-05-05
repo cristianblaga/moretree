@@ -312,6 +312,12 @@
             Create a new instance of a TreeListView
             </summary>
         </member>
+        <member name="M:System.Windows.Forms.TreeListView.WndProc(System.Windows.Forms.Message@)">
+            <summary>
+            WndProc
+            </summary>
+            <param name="m"></param>
+        </member>
         <member name="M:System.Windows.Forms.TreeListView.OnKeyDown(System.Windows.Forms.KeyEventArgs)">
             <summary>
             Raises the KeyDown event
@@ -407,6 +413,45 @@
             <summary>
             Resumes drawing of the list view control after drawing is suspended by the BeginUpdate method
             </summary>
+        </member>
+        <member name="M:System.Windows.Forms.TreeListView.GetColumnIndex(System.Int32)">
+            <summary>
+            Get the index of the specified column from its physical position
+            </summary>
+            <param name="columnorder"></param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Windows.Forms.TreeListView.GetColumnOrder(System.Int32)">
+            <summary>
+            Gets the order of a specified column
+            </summary>
+            <param name="columnindex"></param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Windows.Forms.TreeListView.GetColumnsOrder">
+            <summary>
+            Gets the columns order
+            </summary>
+            <returns>Example {3,1,4,2}</returns>
+        </member>
+        <member name="M:System.Windows.Forms.TreeListView.SetColumnsOrder(System.Int32[])">
+            <summary>
+            Indicates the column order (for example : {0,1,3,2})
+            </summary>
+            <param name="colorderarray"></param>
+        </member>
+        <member name="M:System.Windows.Forms.TreeListView.Scroll(System.Int32,System.Int32)">
+            <summary>
+            Scrolls the control
+            </summary>
+            <param name="x"></param>
+            <param name="y"></param>
+        </member>
+        <member name="M:System.Windows.Forms.TreeListView.SetColumnsOrder(System.String)">
+            <summary>
+            Indicates the column order (for example : "3142")
+            </summary>
+            <param name="colorder"></param>
         </member>
         <member name="M:System.Windows.Forms.TreeListView.GetVisibleItems">
             <summary>
