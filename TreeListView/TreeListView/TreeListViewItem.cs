@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices.APIs;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace System.Windows.Forms
 {
@@ -36,12 +37,14 @@ namespace System.Windows.Forms
 		/// </summary>
 		PlusMinus = 4
 	}
-	#endregion
+
+#endregion
 	/// <summary>
 	/// Represents an item in a TreeListView control
 	/// </summary>
 	public class TreeListViewItem : ListViewItem
 	{
+	
 		#region Private delegates
 		private delegate void ChangeChildrenCheckStateRecursivelyHandler(CheckState state);
 		private delegate TreeListViewItemCollection GetCollectionHandler();
@@ -406,6 +409,7 @@ namespace System.Windows.Forms
 		public TreeListViewItem()
 		{
 			_items = new TreeListViewItemCollection(this);
+			
             
 		}
         

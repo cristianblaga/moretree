@@ -72,7 +72,7 @@ namespace TryTreeListView
 			// treeListView1
 			// 
 			this.treeListView1.AllowColumnReorder = true;
-			treeListView1.UseCustomDrawHeader = false;
+			treeListView1.UseCustomDrawHeader = true;
 			this.treeListView1.Anchor = (((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
 				| System.Windows.Forms.AnchorStyles.Left) 
 				| System.Windows.Forms.AnchorStyles.Right);
@@ -92,6 +92,10 @@ namespace TryTreeListView
 			this.treeListView1.BeforeLabelEdit += new System.Windows.Forms.TreeListViewBeforeLabelEditEventHandler(this.treeListView1_BeforeLabelEdit);
 			this.treeListView1.BeforeCollapse += new System.Windows.Forms.TreeListViewCancelEventHandler(this.treeListView1_BeforeCollapse);
 			this.treeListView1.BeforeExpand += new System.Windows.Forms.TreeListViewCancelEventHandler(this.treeListView1_BeforeExpand);
+
+			treeListView1.OwnerDraw = true;
+			
+
 			// 
 			// columnHeader1
 			// 
@@ -203,8 +207,19 @@ namespace TryTreeListView
 
             var ic = new TreeListViewItem("XXX", 0);
             var ic1 = new TreeListViewItem("XXy", 0);
+
             var ic2 = new TreeListViewItem("XXz", 0);
-            ic1.SubItems.Add("");
+
+			var myCustomSubItem = new TreeListViewSubItem()
+			{
+				Text = "Text",
+				UseGradientBackground = true,
+				BackgroundGradientStartColor = Color.Red,
+				FillRatio = .4,
+			};
+
+			ic1.SubItems.Add(myCustomSubItem);
+
             ic1.SubItems.Add(new Button2Item("r ic1"));
             
             ic.SubItems.Add(new Button2Item("r ic"));

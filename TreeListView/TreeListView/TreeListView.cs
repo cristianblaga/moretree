@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.APIs;
 using System.Diagnostics;
+using System.Drawing.Drawing2D;
 
 namespace System.Windows.Forms
 {
@@ -589,6 +590,37 @@ namespace System.Windows.Forms
 			int style = APIsUser32.SendMessage(Handle, (int)APIsEnums.ListViewMessages.GETEXTENDEDLISTVIEWSTYLE, 0, 0);
 			style |= (int)(APIsEnums.ListViewExtendedStyles.INFOTIP | APIsEnums.ListViewExtendedStyles.LABELTIP);
 			APIsUser32.SendMessage(Handle, (int)APIsEnums.ListViewMessages.SETEXTENDEDLISTVIEWSTYLE, 0, style);
+
+			
+		}
+		protected override void OnDrawSubItem(DrawListViewSubItemEventArgs e)
+		{
+			var myItem = e.SubItem as TreeListViewSubItem;
+			if (myItem != null && myItem.UseGradientBackground)
+			{
+				var paintBounds = new Rectangle(e.Bounds.X, e.Bounds.Y, (int)(e.Bounds.Width * myItem.FillRatio), e.Bounds.Height);
+
+				using (var gb = new LinearGradientBrush(paintBounds, myItem.BackgroundGradientStartColor, myItem.BackColor, .0))
+				{
+					e.Graphics.FillRectangle(gb, paintBounds);
+				}
+				
+				e.DrawText(TextFormatFlags.Right);
+
+			}
+			else
+			{
+				e.DrawDefault = true;
+			}
+
+			base.OnDrawSubItem(e);
+		}
+		protected override void OnDrawItem(DrawListViewItemEventArgs e)
+		{
+			if (!(e.Item is TreeListViewItem))
+				e.DrawDefault = true;
+
+			base.OnDrawItem(e);
 		}
 		#endregion
 		#region WndProc

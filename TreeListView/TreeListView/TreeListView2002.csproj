@@ -73,6 +73,7 @@
     <Reference Include="System">
       <Name>System</Name>
     </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data">
       <Name>System.Data</Name>
     </Reference>
@@ -115,6 +116,7 @@
     <Compile Include="TreeListViewItemCollection.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TreeListViewSubItem.cs" />
     <Compile Include="TreeListViewSubItemEdit.cs">
       <SubType>Code</SubType>
     </Compile>
