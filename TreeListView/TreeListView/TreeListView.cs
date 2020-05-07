@@ -598,14 +598,17 @@ namespace System.Windows.Forms
 			var myItem = e.SubItem as TreeListViewSubItem;
 			if (myItem != null && myItem.UseGradientBackground)
 			{
-				var paintBounds = new Rectangle(e.Bounds.X, e.Bounds.Y, (int)(e.Bounds.Width * myItem.FillRatio), e.Bounds.Height);
+				int w = (int)(e.Bounds.Width * myItem.FillRatio);
+				var paintBounds = new Rectangle(e.Bounds.X + w , e.Bounds.Y, w , e.Bounds.Height);
 
-				using (var gb = new LinearGradientBrush(paintBounds, myItem.BackgroundGradientStartColor, myItem.BackColor, .0))
+				using (var gb = new LinearGradientBrush(paintBounds, myItem.BackgroundGradientStartColor, myItem.BackColor, (float)180.0))
+				using (var pen = new Pen(myItem.BackColor))
 				{
 					e.Graphics.FillRectangle(gb, paintBounds);
+					e.Graphics.DrawRectangle(pen, paintBounds);
 				}
 				
-				e.DrawText(TextFormatFlags.Right);
+				e.DrawText(TextFormatFlags.Left);
 
 			}
 			else

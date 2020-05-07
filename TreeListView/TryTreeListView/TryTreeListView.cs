@@ -215,7 +215,7 @@ namespace TryTreeListView
 				Text = "Text",
 				UseGradientBackground = true,
 				BackgroundGradientStartColor = Color.Red,
-				FillRatio = .4,
+				FillRatio = .6,
 			};
 
 			ic1.SubItems.Add(myCustomSubItem);
