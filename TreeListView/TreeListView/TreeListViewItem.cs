@@ -906,7 +906,7 @@ namespace System.Windows.Forms
 		}
         #endregion
 
-        Button btn = new Button() { Text = "Button" };
+        //Button btn = new Button() { Text = "Button" };
 
 		#region DrawFocusCues
 		internal void DrawFocusCues()
