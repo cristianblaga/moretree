@@ -1007,18 +1007,20 @@ namespace System.Windows.Forms
                     g.FillRectangle(brush, r);
                 brush.Dispose();
             }
-
-            for (int i = 0; i < SubItems.Count; ++i)
+			Console.WriteLine($"Draw intermediat state for  {Text} - {Index}");
+			for (int i = 0; i < SubItems.Count; ++i)
             {
                 
                 var asControlWrapper = SubItems[i] as IControlWrappedItem;
                 if (asControlWrapper == null)
                     continue;
 
+				if (asControlWrapper.Control.Visible)
+				{
+					asControlWrapper.Control.Bounds = TreeListView.GetSubItemRect(Index, i);
 
-                asControlWrapper.Control.Bounds = TreeListView.GetSubItemRect(Index, i);
-                asControlWrapper.Control.Visible = true;
-                Console.WriteLine($"item {Text} - {Index},{i}, { asControlWrapper.Control.Bounds} { asControlWrapper.Control}");
+					Console.WriteLine($"item {Text} - {Index},{i}, { asControlWrapper.Control.Bounds} { asControlWrapper.Control}");
+				}
             }
         }
 

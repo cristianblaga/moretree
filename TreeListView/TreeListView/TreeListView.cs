@@ -1723,6 +1723,9 @@ namespace System.Windows.Forms
 			TreeListViewItemCollection visibleItems = new TreeListViewItemCollection();
 			if (base.Items.Count == 0) return visibleItems;
 			int firstItemIndex = TopItem.Index;
+			if (firstItemIndex > 1)
+				firstItemIndex-=2; //if not DrawIntermediate state will not be called for the top part of the rows.
+
 			int itemsPerPageCount =
 				APIsUser32.SendMessage(Handle, (int)APIsEnums.ListViewMessages.GETITEMCOUNT, IntPtr.Zero, IntPtr.Zero);
 			int lastVisibleItemIndex = firstItemIndex + itemsPerPageCount > base.Items.Count ?

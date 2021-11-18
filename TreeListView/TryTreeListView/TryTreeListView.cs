@@ -103,6 +103,7 @@ namespace TryTreeListView
             this.treeListView1.BeforeLabelEdit += new System.Windows.Forms.TreeListViewBeforeLabelEditEventHandler(this.treeListView1_BeforeLabelEdit);
             this.treeListView1.BeforeExpand += new System.Windows.Forms.TreeListViewCancelEventHandler(this.treeListView1_BeforeExpand);
             this.treeListView1.BeforeCollapse += new System.Windows.Forms.TreeListViewCancelEventHandler(this.treeListView1_BeforeCollapse);
+            treeListView1.ItemSelectionChanged += TreeListView1_ItemSelectionChanged;
             // 
             // columnHeader1
             // 
@@ -182,9 +183,21 @@ namespace TryTreeListView
             this.ResumeLayout(false);
 
 		}
-		#endregion
 
-		[STAThread]
+        private void TreeListView1_ItemSelectionChanged(object sender, ListViewItemSelectionChangedEventArgs e)
+        {
+            
+            if (e.Item.SubItems.Count > 1)
+            {
+                var button = e.Item.SubItems[1] as Button2Item;
+                button.Control.Visible = e.IsSelected;
+
+            }
+
+        }
+        #endregion
+
+        [STAThread]
 		static void Main() 
 		{
 			Application.Run(new TryTreeListView());
@@ -270,7 +283,7 @@ namespace TryTreeListView
         List<TreeListViewItem> items1k = new List<TreeListViewItem>();
         private void button3_Click(object sender, EventArgs e)
         {
-            for (var i = 0; i < 1000; ++i)
+            for (var i = 0; i < 20; ++i)
             {
                 Button2Item referencedButton = new Button2Item("ref");
                 TreeListViewItem referencedListItem = new TreeListViewItem("new Hierarchy", 0);
@@ -290,6 +303,7 @@ namespace TryTreeListView
                 theButton.Dispose();
 
             }
+            items1k.Clear();
         }
 
     
@@ -324,6 +338,7 @@ namespace TryTreeListView
             _b.FlatStyle = FlatStyle.System;
             _b.Text = label;
             _b.Visible = false;
+           
             _b.Click += (sender, e) =>
             {
                 MessageBox.Show("Hello dude from 2.");
