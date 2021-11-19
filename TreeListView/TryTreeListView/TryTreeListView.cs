@@ -104,6 +104,7 @@ namespace TryTreeListView
             this.treeListView1.BeforeExpand += new System.Windows.Forms.TreeListViewCancelEventHandler(this.treeListView1_BeforeExpand);
             this.treeListView1.BeforeCollapse += new System.Windows.Forms.TreeListViewCancelEventHandler(this.treeListView1_BeforeCollapse);
             treeListView1.ItemSelectionChanged += TreeListView1_ItemSelectionChanged;
+            treeListView1.Columns[1].TextAlign = HorizontalAlignment.Center;
             // 
             // columnHeader1
             // 
@@ -335,6 +336,8 @@ namespace TryTreeListView
         public Control Control { get => _b; set => throw new NotImplementedException(); }
         public Button2Item(string label)
         {
+            Text = label;
+            
             _b.FlatStyle = FlatStyle.System;
             _b.Text = label;
             _b.Visible = false;
